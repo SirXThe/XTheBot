@@ -27,6 +27,7 @@ class WarnCommand(commands.Cog):
         self._last_member = None
 
     @commands.slash_command(
+        dm_permission=False,
         name="warn",
         description="Warn a user in the server.",
         options=[

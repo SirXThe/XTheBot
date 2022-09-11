@@ -27,6 +27,7 @@ class NickCommand(commands.Cog):
         self._last_member = None
 
     @commands.slash_command(
+        dm_permission=False,
         name="nick",
         description="Nick a user in the server.",
         options=[

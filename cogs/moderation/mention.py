@@ -27,6 +27,7 @@ class MentionCommand(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(
+        dm_permission=False,
         name="mention",
         description="Mentions a random user."
     )

@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import disnake
 from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
-from datetime import datetime
 
 
 class ServerInfoCommand(commands.Cog):
@@ -27,6 +26,7 @@ class ServerInfoCommand(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(
+        dm_permission=False,
         name="serverinfo",
         description="Show some information about the current server."
     )

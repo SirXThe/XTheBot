@@ -26,6 +26,7 @@ class RulesCommand(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(
+        dm_permission=False,
         name="rules",
         description="Show a server rules template."
     )

@@ -27,6 +27,7 @@ class KickCommand(commands.Cog):
         self._last_member = None
 
     @commands.slash_command(
+        dm_permission=False,
         name="kick",
         description="Kick a user from the server.",
         options=[

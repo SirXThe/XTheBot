@@ -26,6 +26,7 @@ class TimeoutCommand(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(
+        dm_permission=False,
         name="timeout",
         description="Timeout a user in the server.",
         options=[

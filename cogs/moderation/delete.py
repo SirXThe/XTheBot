@@ -27,6 +27,7 @@ class DeleteCommand(commands.Cog):
         self._last_member = None
 
     @commands.slash_command(
+        dm_permission=False,
         name="delete",
         description="Delete a number of messages.",
         options=[
