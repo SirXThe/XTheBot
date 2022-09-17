@@ -55,5 +55,5 @@ class RandomFactCommand(commands.Cog):
                     await interaction.send(embed=embed, ephemeral=True)
 
 
-def setup(bot: commands.Bot):
+def setup(bot):
     bot.add_cog(RandomFactCommand(bot))

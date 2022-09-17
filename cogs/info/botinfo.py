@@ -22,11 +22,9 @@ import disnake
 from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 
-import settings
-
 
 class BotInfoCommand(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot):
         self.bot = bot
 
     @commands.slash_command(
@@ -42,7 +40,7 @@ class BotInfoCommand(commands.Cog):
                         "**Prefix:**\n"
                         "Slash Commands (/)\n"
                         "**Bot Version:**\n"
-                        f"{settings.Version}\n"
+                        f"{self.bot.settings['prefix']}\n"
                         "**Python Version:**\n"
                         f"{platform.python_version()}\n"
                         "**Disnake API Version:**\n"
@@ -54,5 +52,5 @@ class BotInfoCommand(commands.Cog):
         await interaction.send(embed=embed)
 
 
-def setup(bot: commands.Bot):
+def setup(bot):
     bot.add_cog(BotInfoCommand(bot))

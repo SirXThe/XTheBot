@@ -22,7 +22,7 @@ from disnake.ext import commands
 
 
 class BanCommand(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot):
         self.bot = bot
         self._last_member = None
 
@@ -82,5 +82,5 @@ class BanCommand(commands.Cog):
             await interaction.send(embed=embed, ephemeral=True)
 
 
-def setup(bot: commands.Bot):
+def setup(bot):
     bot.add_cog(BanCommand(bot))

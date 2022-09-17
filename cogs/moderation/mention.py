@@ -23,7 +23,7 @@ from disnake.ext import commands
 
 
 class MentionCommand(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot):
         self.bot = bot
 
     @commands.slash_command(
@@ -37,5 +37,5 @@ class MentionCommand(commands.Cog):
         await interaction.send(f"{user.mention}")
 
 
-def setup(bot: commands.Bot):
+def setup(bot):
     bot.add_cog(MentionCommand(bot))

@@ -23,7 +23,7 @@ from disnake.ext import commands
 
 
 class JokeCommand(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot):
         self.bot = bot
 
     @commands.slash_command(
@@ -57,5 +57,5 @@ class JokeCommand(commands.Cog):
                     await interaction.send(embed=embed, ephemeral=True)
 
 
-def setup(bot: commands.Bot):
+def setup(bot):
     bot.add_cog(JokeCommand(bot))

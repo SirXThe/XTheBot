@@ -22,7 +22,7 @@ from disnake.ext import commands
 
 
 class GoogleCommand(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot):
         self.bot = bot
 
     @commands.slash_command(
@@ -50,5 +50,5 @@ class GoogleCommand(commands.Cog):
             break
 
 
-def setup(bot: commands.Bot):
+def setup(bot):
     bot.add_cog(GoogleCommand(bot))

@@ -22,7 +22,7 @@ from disnake.ext import commands
 
 
 class KickCommand(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot):
         self.bot = bot
         self._last_member = None
 
@@ -74,5 +74,5 @@ class KickCommand(commands.Cog):
             await interaction.send(embed=embed, ephemeral=True)
 
 
-def setup(bot: commands.Bot):
+def setup(bot):
     bot.add_cog(KickCommand(bot))

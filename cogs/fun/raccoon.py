@@ -21,7 +21,7 @@ from disnake.ext import commands
 
 
 class RaccoonCommand(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot):
         self.bot = bot
 
     @commands.slash_command(
@@ -33,5 +33,5 @@ class RaccoonCommand(commands.Cog):
         await interaction.send(url)
 
 
-def setup(bot: commands.Bot):
+def setup(bot):
     bot.add_cog(RaccoonCommand(bot))

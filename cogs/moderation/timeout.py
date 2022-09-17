@@ -22,7 +22,7 @@ from disnake.ext import commands
 
 
 class TimeoutCommand(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot):
         self.bot = bot
 
     @commands.slash_command(
@@ -79,5 +79,5 @@ class TimeoutCommand(commands.Cog):
             await interaction.send(embed=embed)
 
 
-def setup(bot: commands.Bot):
+def setup(bot):
     bot.add_cog(TimeoutCommand(bot))
