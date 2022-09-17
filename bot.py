@@ -31,7 +31,7 @@ intents = disnake.Intents.default()
 bot = commands.Bot(intents=intents)
 
 if not os.path.isfile("settings.json"):
-    sys.exit("An error occured initializing the settings.json file!")
+    sys.exit("An error occurred initializing the settings.json file!")
 else:
     with open("settings.json") as file:
         settings = json.load(file)

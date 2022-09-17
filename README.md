@@ -11,7 +11,7 @@ After you invited the bot to your server, you can use it with slash (/) commands
 </details>
 
 ## Features
-<details>
+<details open>
  <summary>Fun</summary>
 
 ## Fun
@@ -27,7 +27,7 @@ After you invited the bot to your server, you can use it with slash (/) commands
 - **RPS** - Play a game of rock paper scissors against the bot.
 - **Sentence** - The bot will randomise your sentence.
 </details>
-<details>
+<details open>
   <summary>Info</summary>
 
 ## Info
@@ -38,7 +38,7 @@ After you invited the bot to your server, you can use it with slash (/) commands
 - **Serverinfo** - Show some information about the current server.
 - **Support** - Get the invitation link for the support server.
 </details>
-<details>
+<details open>
   <summary>Moderation</summary>
 
 ## Moderation
@@ -51,3 +51,5 @@ After you invited the bot to your server, you can use it with slash (/) commands
 - **Timeout** - Timeout a user in the server.
 - **Warn** - Warn a user in the server.
 </details>
+
+### This project is licensed under the GNU Affero General Public License 3.0 - see the LICENSE.md file for details
