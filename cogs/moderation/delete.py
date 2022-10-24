@@ -64,7 +64,7 @@ class DeleteCommand(commands.Cog):
                     text="Made by XThe"
                 )
             await interaction.send(embed=embed)
-        except:
+        except Exception:
             embed = disnake.Embed(
                 color=0x8b2d27,
                 title="Error!",

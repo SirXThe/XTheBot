@@ -22,7 +22,7 @@ After you invited the bot to your server, you can use it with slash (/) commands
 - **Digit** - The bot will generate a random digit.
 - **Embed** - Generate a custom embed message.
 - **Facts** - Show a random fact.
-- **Googe** - Search something in the world wide web with Google.
+- **Google** - Search something in the world wide web with Google.
 - **Joke** - Show a random joke.
 - **RPS** - Play a game of rock paper scissors against the bot.
 - **Sentence** - The bot will randomise your sentence.

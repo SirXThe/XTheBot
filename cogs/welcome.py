@@ -41,6 +41,7 @@ class Welcome(commands.Cog):
                     title=f"Thanks for joining {channel.guild}!"
                 )
                 await member.send(embed=embed)
+                await member.edit(nick=f"+ {member}")
             except:
                 pass
 
