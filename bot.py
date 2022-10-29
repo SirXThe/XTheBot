@@ -21,14 +21,17 @@ from disnake.ext import commands, tasks
 from contextlib import closing
 
 import random
+import logging
 import sqlite3
 import json
 import platform
 import os
 import sys
 
+
+logging.basicConfig(filename='bot.log', format='%(asctime)s %(levelname)s: %(message)s', datefmt='%m-%d-%Y %H:%M:%S', encoding='utf-8', filemode='w', level=logging.INFO)
 intents = disnake.Intents.all()
-bot = commands.Bot(intents=intents)
+bot = disnake.ext.commands.InteractionBot(intents=intents)
 
 if not os.path.isfile("settings.json"):
     sys.exit("An error occurred initializing the settings.json file!")

@@ -32,29 +32,29 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #  You should have received a copy of the GNU Affero General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sqlite3
-
-import sqlite3
-
-connection = sqlite3.connect("database/database.db")
-cursor = connection.cursor()
-
-count_info_headers = ['guild_id', 'channel_id', 'count', 'last_user', 'fail_message', 'greedy_message']
+import aiosqlite
+import logging
 
 
-def new_counting_entry(guild_id,
-                       channel_id,
-                       count=str(0),
-                       last_user=str(None),
-                       fail_message=str("{{{user}}} typed the wrong number"),
-                       greedy_message=str("{{{user}}} was too greedy")):
-    temp1 = [
-        str(guild_id),
-        str(channel_id),
-        str(count),
-        str(last_user),
-        str(fail_message),
-        str(greedy_message)]
+async def counting_new_entry(guild_id: int, channel_id: int, count: int = 0, last_user: int = 0):
+    async with aiosqlite.connect("database/database.db") as db:
+        await db.execute("INSERT INTO counting(guild_id, channel_id, count, last_user) VALUES (?, ?, ?, ?)",
+                         (guild_id, channel_id, count, last_user,))
+        await db.commit()
+        logging.info(f"[Counting] Created guild entry for {guild_id}, set it to {channel_id}")
 
-    cursor.execute("INSERT INTO counting %s VALUES %s" % (tuple(count_info_headers), tuple(temp1)))
-    connection.commit()
+
+async def counting_check_entry(guild_id):
+    async with aiosqlite.connect("database/database.db") as db:
+        async with db.execute("SELECT * FROM counting WHERE guild_id=?", (guild_id,)) as cursor:
+            result = await cursor.fetchone()
+            return result
+
+
+async def counting_update_entry(guild_id: int, channel_id: int, count: int, last_user: int):
+    async with aiosqlite.connect("database/database.db") as db:
+        await db.execute("UPDATE counting SET guild_id = ?, channel_id = ?, count = ?, last_user = ? WHERE guild_id = "
+                         "'%s'" %
+                         guild_id, (guild_id, channel_id, count, last_user))
+        await db.commit()
+        logging.info(f"[Counting] Updated counting entry for {guild_id}, set it to {channel_id}, {count}, {last_user}")

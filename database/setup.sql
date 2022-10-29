@@ -20,7 +20,5 @@ CREATE TABLE IF NOT EXISTS `counting` (
 `guild_id` int NOT NULL,
 `channel_id` int NOT NULL,
 `count` int NOT NULL,
-`last_user` int NOT NULL,
-`fail_message` text NOT NULL,
-`greedy_message` text NOT NULL
+`last_user` int NOT NULL
 );
