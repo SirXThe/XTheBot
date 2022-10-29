@@ -53,7 +53,7 @@ class NickCommand(commands.Cog):
             embed = disnake.Embed(
                 color=0x8b2d27,
                 title="**A User got nicked!**",
-                description=f"The user **{user.mention}** has been nicked by **{interaction.author}**"
+                description=f"The user **{user}** has been nicked by **{interaction.author}**"
                             f"\n New name: **{name}**"
             )
             embed.set_footer(
