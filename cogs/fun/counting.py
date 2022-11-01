@@ -15,14 +15,17 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+import calendar
+import logging
+import random
+from datetime import datetime
+
+import disnake
+from disnake import ApplicationCommandInteraction, Option, OptionType, ChannelType
+from disnake.ext import commands
 
 from database import manager as db
 from helpers import helpers
-import logging
-import random
-import disnake
-from disnake import ApplicationCommandInteraction, Option, OptionType
-from disnake.ext import commands
 
 
 class Counting(commands.Cog):
@@ -41,28 +44,37 @@ class Counting(commands.Cog):
         description="Setup the counting function.",
         options=[
             Option(
-                name="channel_id",
-                description="Insert the channel id or leave it blank if you want to use the current channel.",
-                type=OptionType.integer,
-                required=False
+                name="channel",
+                description="Select your counting channel (Text Channel only!).",
+                type=OptionType.channel,
+                required=True
             ),
         ],
     )
-    async def counting_setup(self, interaction: ApplicationCommandInteraction, channel_id: int = None):
-        if channel_id is None:
-            channel_id = interaction.channel.id
+    async def counting_setup(self, interaction: ApplicationCommandInteraction, channel: disnake.TextChannel):
+        if not channel.type == ChannelType.text or not ChannelType.news:
+            embed = disnake.Embed(
+                color=0x8b2d27,
+                title="Error!",
+                description=f"Please select a text channel!"
+            )
+            await interaction.send(embed=embed, ephemeral=True)
+            return
         c = await db.counting_check_entry(interaction.guild.id)
         if c is None:
-            await db.counting_new_entry(interaction.guild.id, channel_id, "normal")
+            await db.counting_new_entry(interaction.guild.id, channel.id, "Normal")
         else:
-            await db.counting_update_entry(interaction.guild.id, channel_id, c[2], c[3],
-                                           c[4], c[5], c[6], c[7], c[8], c[9], c[10])
+            await db.counting_update_entry(interaction.guild.id, channel.id, "Normal", c[3],
+                                           c[4], c[5], c[6], c[7], c[8], c[9])
         embed = disnake.Embed(
             color=0x8b2d27,
-            title="Updated Channel ID!",
-            description=f"Updated channel ID to {channel_id}!"
+            title="Updated Channel!",
+            description=f"Updated channel to {channel.mention}!\n"
+                        f"The counting mode is now set to **{c[2]}**."
         )
         await interaction.send(embed=embed)
+        if not interaction.channel.id == channel.id:
+            await channel.send(embed=embed)
 
     @counting.sub_command(
         name="server",
@@ -70,6 +82,7 @@ class Counting(commands.Cog):
     )
     async def server(self, interaction: ApplicationCommandInteraction):
         i = await db.counting_check_entry(interaction.guild.id)
+        date = (datetime.strptime(i[5], '%Y-%m-%d %H:%M:%S.%f'))
         if i is None or i[6] == 0:
             embed = disnake.Embed(
                 color=0x8b2d27,
@@ -81,15 +94,17 @@ class Counting(commands.Cog):
         if i[4] == 0:
             last_user = "n/a"
         else:
-            last_user = f"<@{i[3]}>"
+            last_user = f"<@{i[4]}>"
         embed = disnake.Embed(
             color=0x8b2d27,
             title=f"Stats for {interaction.guild}",
-            description=f"Current count: {i[2]}\n"
-                        f"Last user: {last_user}\n"
-                        f"Number of resets: {i[4]}\n"
-                        f"High score: {i[5]}\n"
-                        f"Scored by <@{i[6]}>"
+            description=f"Current Mode: **{i[2]}**\n"
+                        f"Current Count: **{i[3]}**\n"
+                        f"Last User: **{last_user}**\n"
+                        f"Time Since Last Count: **<t:{calendar.timegm(date.utctimetuple())}:R>**\n"
+                        f"Number of Resets: **{i[6]}**\n"
+                        f"High Score: **{i[7]}**\n"
+                        f"Scored by **<@{i[8]}>**"
         )
         await interaction.send(embed=embed)
         return
@@ -99,15 +114,16 @@ class Counting(commands.Cog):
         description="Show the statistics for an user.",
         options=[
             Option(
-                name="user_id",
+                name="user",
                 description="The user you want to get the stats from.",
                 type=OptionType.user,
                 required=True
             ),
         ],
     )
-    async def server(self, interaction: ApplicationCommandInteraction, user_id: disnake.User):
-        i = await db.stats_check_entry(interaction.guild.id, user_id.id)
+    async def server(self, interaction: ApplicationCommandInteraction, user: disnake.User):
+        i = await db.stats_check_entry(interaction.guild.id, user.id)
+        date = (datetime.strptime(i[5], '%Y-%m-%d %H:%M:%S.%f'))
         if i is None:
             embed = disnake.Embed(
                 color=0x8b2d27,
@@ -118,11 +134,12 @@ class Counting(commands.Cog):
             return
         embed = disnake.Embed(
             color=0x8b2d27,
-            title=f"Stats for {user_id}",
-            description=f"Right counted: {i[2]}\n"
-                        f"Wrong counted: {i[3]}\n"
-                        f"Percentual correct: {round(int(i[2]) / (int(i[2]) + int(i[3])) * 100, 2)}\n"
-                        f"Highest count: {i[4]}\n"
+            title=f"Stats for {user}",
+            description=f"Times Counted: **{i[2] + i[3]}**\n"
+                        f"Wrong Counted: **{i[3]}**\n"
+                        f"Percentual Correct: **{round(int(i[2]) / (int(i[2]) + int(i[3])) * 100, 2)}**\n"
+                        f"Highest Count: **{i[4]}**\n"
+                        f"Time Since Last Count: **<t:{calendar.timegm(date.utctimetuple())}:R>**"
         )
         await interaction.send(embed=embed)
         return
@@ -143,28 +160,28 @@ class Counting(commands.Cog):
                 return
             else:
                 last_count = c[3]
-                commit = last_count + 1
-                if c[2] == "normal":
+                current_count = last_count + 1
+                if c[2] == "Normal":
                     answer = helpers.check_letters(content)
                     if answer is None:
                         return
                     needed = c[3] + 1
-                elif c[2] == "fibonacci":
+                elif c[2] == "Fibonacci":
                     answer = helpers.check_letters(content)
                     if answer is None:
                         return
                     needed = helpers.fibonacci(last_count)
-                elif c[2] == "binary":
+                elif c[2] == "Binary":
                     answer = helpers.check_letters(content)
                     if answer is None:
                         return
                     needed = int(format(last_count + 1, "b"))
-                elif c[2] == "roman":
+                elif c[2] == "Roman":
                     answer = helpers.check_roman(content)
                     if answer is None:
                         return
                     needed = helpers.roman(last_count + 1)
-                elif c[2] == "letters":
+                elif c[2] == "Letters":
                     answer = helpers.check_numbers(content)
                     if answer is None:
                         return
@@ -176,13 +193,15 @@ class Counting(commands.Cog):
                         description="An error occurred!\nReset the current count to 0."
                     )
                     await message.channel.send(embed=embed)
-                    await db.counting_update_entry(c[0], c[1], c[2], 0, 42, 0, 0, c[7], c[8], c[9], c[10])
+                    await db.counting_update_entry(c[0], c[1], "Normal", 0, 0, (datetime.utcnow()),
+                                                   c[6], c[7], c[8], c[9])
                     logging.error(f"[Counting] Exception at on_message: Could not find {c[2]}")
                     return
-                if author == c[5]:
-                    mode = random.choice(["normal", "binary", "fibonacci", "roman", "letters"])
-                    await db.counting_update_entry(c[0], c[1], mode, 0, 42, 0, 0, c[7] + 1, c[8], c[9], c[10])
-                    await db.stats_update_entry(guild, author, False, commit)
+                if author == c[4]:
+                    mode = random.choice(["Normal", "Binary", "Fibonacci", "Roman", "Letters"])
+                    await db.counting_update_entry(c[0], c[1], mode, 0, 0, (datetime.utcnow()),
+                                                   c[6] + 1, c[7], c[8], c[9])
+                    await db.stats_update_entry(guild, author, False, current_count, datetime.utcnow())
                     embed = disnake.Embed(
                         color=0x8b2d27,
                         title="Fail!",
@@ -193,9 +212,10 @@ class Counting(commands.Cog):
                     await message.add_reaction("❌")
                     return
                 if answer != needed:
-                    mode = random.choice(["normal", "binary", "fibonacci", "roman", "letters"])
-                    await db.counting_update_entry(c[0], c[1], mode, 0, 42, 0, 0, c[7] + 1, c[8], c[9], c[10])
-                    await db.stats_update_entry(guild, author, False, commit)
+                    mode = random.choice(["Normal", "Binary", "Fibonacci", "Roman", "Letters"])
+                    await db.counting_update_entry(c[0], c[1], mode, 0, 0, (datetime.utcnow()),
+                                                   c[6] + 1, c[7], c[8], c[9])
+                    await db.stats_update_entry(guild, author, False, current_count, datetime.utcnow())
                     embed = disnake.Embed(
                         color=0x8b2d27,
                         title="Fail!",
@@ -206,14 +226,16 @@ class Counting(commands.Cog):
                     await message.add_reaction("❌")
                     return
                 if answer == needed:
-                    if c[8] < commit:
-                        await db.counting_update_entry(c[0], c[1], c[2], commit, 42, author, 0, c[7],
-                                                       commit, author, c[10])
+                    if c[7] < current_count:
+                        await db.counting_update_entry(c[0], c[1], c[2], current_count, author, datetime.utcnow(), c[6],
+                                                       current_count, author, (datetime.utcnow()))
                     else:
-                        await db.counting_update_entry(c[0], c[1], c[2], commit, 42, author, 0, c[7], c[8],
-                                                       c[9], c[10])
-                    await db.stats_update_entry(guild, author, True, commit)
-                    if commit == 100:
+                        await db.counting_update_entry(c[0], c[1], c[2], current_count, author, datetime.utcnow(), c[6],
+                                                       c[7], c[8], c[9])
+                    await db.stats_update_entry(guild, author, True, current_count, (datetime.utcnow()))
+                    if c[7] < current_count:
+                        reaction = "☑"
+                    elif current_count == 3:
                         reaction = "💯"
                     else:
                         reaction = "✅"

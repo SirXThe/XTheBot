@@ -21,7 +21,6 @@ CREATE TABLE IF NOT EXISTS `counting` (
 `channel_id` int NOT NULL,
 `mode` text,
 `count` int NOT NULL,
-`last_count` int NOT NULL,
 `last_user` int NOT NULL,
 `last_counted` text,
 `resets` int NOT NULL,
@@ -34,5 +33,6 @@ CREATE TABLE IF NOT EXISTS `stats` (
 `user_id`  int NOT NULL,
 `correct`  int NOT NULL,
 `wrong`    int NOT NULL,
-`highest`  int NOT NULL
+`highest`  int NOT NULL,
+`last_counted`  int NOT NULL
 );

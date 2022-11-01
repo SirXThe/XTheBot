@@ -33,17 +33,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import aiosqlite
+from datetime import datetime
 import logging
 
 
-async def counting_new_entry(guild_id: int, channel_id: int, mode: str, count: int = 0, last_count: int = 0,
+async def counting_new_entry(guild_id: int, channel_id: int, mode: str, count: int = 0,
                              last_user: int = 0, last_counted: int = 0, resets: int = 0,
                              record: int = 0, record_user: int = 0, record_time: int = 0):
     async with aiosqlite.connect("database/database.db") as db:
-        await db.execute("INSERT INTO counting(guild_id, channel_id, mode, count, last_count, last_user, "
+        await db.execute("INSERT INTO counting(guild_id, channel_id, mode, count, last_user, "
                          "last_counted, resets, record, record_user, record_time "
-                         ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                         (guild_id, channel_id, mode, count, last_count, last_user, last_counted, resets, record,
+                         ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                         (guild_id, channel_id, mode, count, last_user, last_counted, resets, record,
                           record_user, record_time))
         await db.commit()
         logging.info(f"[Counting] Created guild entry for {guild_id}, set it to {channel_id}")
@@ -56,28 +57,29 @@ async def counting_check_entry(guild_id: int):
             return result
 
 
-async def counting_update_entry(guild_id: int, channel_id: int, mode: str, count: int, last_count: int,
-                                last_user: int, last_counted: int, resets: int,
-                                record: int, record_user: int, record_time: int):
+async def counting_update_entry(guild_id: int, channel_id: int, mode: str, count: int,
+                                last_user: int, last_counted: datetime, resets: int,
+                                record: int, record_user: int, record_time: datetime):
     async with aiosqlite.connect("database/database.db") as db:
-        await db.execute("UPDATE counting SET guild_id = ?, channel_id = ?, mode = ?, count = ?, last_count = ?, "
+        await db.execute("UPDATE counting SET guild_id = ?, channel_id = ?, mode = ?, count = ?,"
                          "last_user = ?, last_counted = ?, resets = ?, "
                          "record = ?, record_user = ?, record_time = ? WHERE guild_id = ?",
-                         (guild_id, channel_id, mode, count, last_count, last_user, last_counted, resets, record,
+                         (guild_id, channel_id, mode, count, last_user, last_counted, resets, record,
                           record_user, record_time, guild_id))
         await db.commit()
         logging.info(f"[Counting] Updated counting entry for {guild_id}, set it to {channel_id}, {count}, {last_user},"
                      f"{resets}, {record}, {record_user}")
 
 
-async def stats_update_entry(guild_id: int, user_id: int, correct: bool, current_count: int):
+async def stats_update_entry(guild_id: int, user_id: int, correct: bool, current_count: int, last_counted: datetime):
     async with aiosqlite.connect("database/database.db") as db:
         async with db.execute(f"SELECT * FROM stats WHERE guild_id='{guild_id}' AND user_id='{user_id}'") as cursor:
             result = await cursor.fetchone()
             print(result)
             if result is None:
-                await db.execute("INSERT INTO stats(guild_id, user_id, correct, wrong, highest) VALUES (?, ?, ?, ?, ?)",
-                                 (guild_id, user_id, 0, 0, 0))
+                await db.execute("INSERT INTO stats(guild_id, user_id, correct, wrong, highest, last_counted)"
+                                 "VALUES (?, ?, ?, ?, ?, ?)",
+                                 (guild_id, user_id, 0, 0, 0, 0))
                 await db.commit()
                 return
             else:
@@ -86,14 +88,17 @@ async def stats_update_entry(guild_id: int, user_id: int, correct: bool, current
                 else:
                     highest = result[4]
                 if correct:
-                    await db.execute("UPDATE stats SET guild_id = ?, user_id = ?, correct = ?, wrong = ?, highest = ?"
+                    await db.execute("UPDATE stats SET guild_id = ?, user_id = ?, correct = ?, wrong = ?, highest = ?,"
+                                     "last_counted= ?"
                                      "WHERE guild_id = ? AND user_id = ?",
-                                     (guild_id, user_id, result[2] + 1, result[3], highest, guild_id, user_id))
+                                     (guild_id, user_id, result[2] + 1, result[3], highest, last_counted, guild_id,
+                                      user_id))
                     print("True")
                 else:
-                    await db.execute(f"UPDATE stats SET guild_id = ?, user_id = ?, correct = ?, wrong = ?"
-                                     "WHERE guild_id = ? AND user_id = ?",
-                                     (guild_id, user_id, result[2], result[3] + 1, guild_id, user_id))
+                    await db.execute(f"UPDATE stats SET guild_id = ?, user_id = ?, correct = ?, wrong = ?,"
+                                     f"last_counted = ?"
+                                     " WHERE guild_id = ? AND user_id = ?",
+                                     (guild_id, user_id, result[2], result[3] + 1, last_counted, guild_id, user_id))
                     print("Wrong")
                 await db.commit()
                 return
