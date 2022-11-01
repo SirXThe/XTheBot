@@ -17,7 +17,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 from database import manager as db
-import sympy
+from helpers import helpers
+import logging
+import random
 import disnake
 from disnake import ApplicationCommandInteraction, Option, OptionType
 from disnake.ext import commands
@@ -51,11 +53,10 @@ class Counting(commands.Cog):
             channel_id = interaction.channel.id
         c = await db.counting_check_entry(interaction.guild.id)
         if c is None:
-            await db.counting_new_entry(interaction.guild.id, channel_id)
-
+            await db.counting_new_entry(interaction.guild.id, channel_id, "normal")
         else:
             await db.counting_update_entry(interaction.guild.id, channel_id, c[2], c[3],
-                                           c[4], c[5], c[6])
+                                           c[4], c[5], c[6], c[7], c[8], c[9], c[10])
         embed = disnake.Embed(
             color=0x8b2d27,
             title="Updated Channel ID!",
@@ -141,46 +142,78 @@ class Counting(commands.Cog):
             if str(c[1]) != str(channel):
                 return
             else:
-                try:
-                    if any(a.isalpha() for a in content):
+                last_count = c[3]
+                commit = last_count + 1
+                if c[2] == "normal":
+                    answer = helpers.check_letters(content)
+                    if answer is None:
                         return
-                    else:
-                        current_count = int(sympy.sympify(content))
-                except Exception:
+                    needed = c[3] + 1
+                elif c[2] == "fibonacci":
+                    answer = helpers.check_letters(content)
+                    if answer is None:
+                        return
+                    needed = helpers.fibonacci(last_count)
+                elif c[2] == "binary":
+                    answer = helpers.check_letters(content)
+                    if answer is None:
+                        return
+                    needed = int(format(last_count + 1, "b"))
+                elif c[2] == "roman":
+                    answer = helpers.check_roman(content)
+                    if answer is None:
+                        return
+                    needed = helpers.roman(last_count + 1)
+                elif c[2] == "letters":
+                    answer = helpers.check_numbers(content)
+                    if answer is None:
+                        return
+                    needed = helpers.letters(last_count + 1)
+                else:
+                    embed = disnake.Embed(
+                        color=0x8b2d27,
+                        title="Error!",
+                        description="An error occurred!\nReset the current count to 0."
+                    )
+                    await message.channel.send(embed=embed)
+                    await db.counting_update_entry(c[0], c[1], c[2], 0, 42, 0, 0, c[7], c[8], c[9], c[10])
+                    logging.error(f"[Counting] Exception at on_message: Could not find {c[2]}")
                     return
-                old_count = c[2]
-                if author == c[3]:
-                    await db.counting_update_entry(c[0], c[1], 0, 0, c[4] + 1, c[5], c[6])
-                    await db.stats_update_entry(guild, author, False, current_count)
+                if author == c[5]:
+                    mode = random.choice(["normal", "binary", "fibonacci", "roman", "letters"])
+                    await db.counting_update_entry(c[0], c[1], mode, 0, 42, 0, 0, c[7] + 1, c[8], c[9], c[10])
+                    await db.stats_update_entry(guild, author, False, commit)
                     embed = disnake.Embed(
                         color=0x8b2d27,
                         title="Fail!",
-                        description=f"{message.author.mention} was too **greedy!**"
+                        description=f"{message.author.mention} was too **greedy** at {needed}!\n"
+                                    f"The mode is now set to **{mode}**."
                     )
                     await message.channel.send(embed=embed)
                     await message.add_reaction("❌")
                     return
-                if old_count + 1 != current_count:
-                    await db.counting_update_entry(c[0], c[1], 0, 0, c[4] + 1, c[5], c[6])
-                    await db.stats_update_entry(guild, author, False, current_count)
+                if answer != needed:
+                    mode = random.choice(["normal", "binary", "fibonacci", "roman", "letters"])
+                    await db.counting_update_entry(c[0], c[1], mode, 0, 42, 0, 0, c[7] + 1, c[8], c[9], c[10])
+                    await db.stats_update_entry(guild, author, False, commit)
                     embed = disnake.Embed(
                         color=0x8b2d27,
                         title="Fail!",
-                        description=f"{message.author.mention} has **failed** at {old_count + 1}!\n Answer: "
-                                    f"{current_count}"
+                        description=f"{message.author.mention} has **failed** at {needed}!\n "
+                                    f"The mode is now set to **{mode}**."
                     )
                     await message.channel.send(embed=embed)
                     await message.add_reaction("❌")
                     return
-                if old_count + 1 == current_count:
-                    if c[5] < current_count:
-                        await db.counting_update_entry(c[0], c[1], current_count, author, c[4],
-                                                       current_count, author)
+                if answer == needed:
+                    if c[8] < commit:
+                        await db.counting_update_entry(c[0], c[1], c[2], commit, 42, author, 0, c[7],
+                                                       commit, author, c[10])
                     else:
-                        await db.counting_update_entry(c[0], c[1], current_count, author,
-                                                       c[4], c[5], c[6])
-                    await db.stats_update_entry(guild, author, True, current_count)
-                    if current_count == 100:
+                        await db.counting_update_entry(c[0], c[1], c[2], commit, 42, author, 0, c[7], c[8],
+                                                       c[9], c[10])
+                    await db.stats_update_entry(guild, author, True, commit)
+                    if commit == 100:
                         reaction = "💯"
                     else:
                         reaction = "✅"

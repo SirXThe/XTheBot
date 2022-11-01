@@ -36,12 +36,15 @@ import aiosqlite
 import logging
 
 
-async def counting_new_entry(guild_id: int, channel_id: int, count: int = 0, last_user: int = 0, resets: int = 0,
-                             record: int = 0, record_user: int = 0):
+async def counting_new_entry(guild_id: int, channel_id: int, mode: str, count: int = 0, last_count: int = 0,
+                             last_user: int = 0, last_counted: int = 0, resets: int = 0,
+                             record: int = 0, record_user: int = 0, record_time: int = 0):
     async with aiosqlite.connect("database/database.db") as db:
-        await db.execute("INSERT INTO counting(guild_id, channel_id, count, last_user, resets, record, record_user"
-                         ") VALUES (?, ?, ?, ?, ?, ?, ?)",
-                         (guild_id, channel_id, count, last_user, resets, record, record_user,))
+        await db.execute("INSERT INTO counting(guild_id, channel_id, mode, count, last_count, last_user, "
+                         "last_counted, resets, record, record_user, record_time "
+                         ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                         (guild_id, channel_id, mode, count, last_count, last_user, last_counted, resets, record,
+                          record_user, record_time))
         await db.commit()
         logging.info(f"[Counting] Created guild entry for {guild_id}, set it to {channel_id}")
 
@@ -53,12 +56,15 @@ async def counting_check_entry(guild_id: int):
             return result
 
 
-async def counting_update_entry(guild_id: int, channel_id: int, count: int, last_user: int, resets: int,
-                                record: int, record_user: int):
+async def counting_update_entry(guild_id: int, channel_id: int, mode: str, count: int, last_count: int,
+                                last_user: int, last_counted: int, resets: int,
+                                record: int, record_user: int, record_time: int):
     async with aiosqlite.connect("database/database.db") as db:
-        await db.execute("UPDATE counting SET guild_id = ?, channel_id = ?, count = ?, last_user = ?, resets = ?, "
-                         "record = ?, record_user = ? WHERE guild_id = ?",
-                         (guild_id, channel_id, count, last_user, resets, record, record_user, guild_id))
+        await db.execute("UPDATE counting SET guild_id = ?, channel_id = ?, mode = ?, count = ?, last_count = ?, "
+                         "last_user = ?, last_counted = ?, resets = ?, "
+                         "record = ?, record_user = ?, record_time = ? WHERE guild_id = ?",
+                         (guild_id, channel_id, mode, count, last_count, last_user, last_counted, resets, record,
+                          record_user, record_time, guild_id))
         await db.commit()
         logging.info(f"[Counting] Updated counting entry for {guild_id}, set it to {channel_id}, {count}, {last_user},"
                      f"{resets}, {record}, {record_user}")
