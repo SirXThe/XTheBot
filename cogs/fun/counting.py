@@ -15,6 +15,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+
 import calendar
 import logging
 import random
@@ -170,7 +171,7 @@ class Counting(commands.Cog):
                     answer = helpers.check_letters(content)
                     if answer is None:
                         return
-                    needed = helpers.fibonacci(last_count)
+                    needed = helpers.fibonacci(last_count + 1)
                 elif c[2] == "Binary":
                     answer = helpers.check_letters(content)
                     if answer is None:
@@ -181,7 +182,7 @@ class Counting(commands.Cog):
                     if answer is None:
                         return
                     needed = helpers.roman(last_count + 1)
-                elif c[2] == "Letters":
+                elif c[2] == "Alphabet":
                     answer = helpers.check_numbers(content)
                     if answer is None:
                         return
@@ -198,7 +199,7 @@ class Counting(commands.Cog):
                     logging.error(f"[Counting] Exception at on_message: Could not find {c[2]}")
                     return
                 if author == c[4]:
-                    mode = random.choice(["Normal", "Binary", "Fibonacci", "Roman", "Letters"])
+                    mode = random.choice(["Normal", "Binary", "Fibonacci", "Roman", "Alphabet"])
                     await db.counting_update_entry(c[0], c[1], mode, 0, 0, (datetime.utcnow()),
                                                    c[6] + 1, c[7], c[8], c[9])
                     await db.stats_update_entry(guild, author, False, current_count, datetime.utcnow())
@@ -212,7 +213,7 @@ class Counting(commands.Cog):
                     await message.add_reaction("❌")
                     return
                 if answer != needed:
-                    mode = random.choice(["Normal", "Binary", "Fibonacci", "Roman", "Letters"])
+                    mode = random.choice(["Normal", "Binary", "Fibonacci", "Roman", "Alphabet"])
                     await db.counting_update_entry(c[0], c[1], mode, 0, 0, (datetime.utcnow()),
                                                    c[6] + 1, c[7], c[8], c[9])
                     await db.stats_update_entry(guild, author, False, current_count, datetime.utcnow())
@@ -235,11 +236,20 @@ class Counting(commands.Cog):
                     await db.stats_update_entry(guild, author, True, current_count, (datetime.utcnow()))
                     if c[7] < current_count:
                         reaction = "☑"
-                    elif current_count == 3:
-                        reaction = "💯"
                     else:
                         reaction = "✅"
-                    await message.add_reaction(reaction)
+                    if current_count == 42:
+                        reaction = ["🤔"]
+                    elif current_count == 100:
+                        reaction = ["💯"]
+                    elif current_count == 333:
+                        reaction = ["🔺", "👁"]
+                    elif current_count == 666:
+                        reaction = ["👹"]
+                    elif current_count == 1234:
+                        reaction = ['🔢']
+                    for r in reaction:
+                        await message.add_reaction(r)
                     return
 
 

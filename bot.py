@@ -18,11 +18,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import disnake
 from disnake.ext import commands, tasks
-from contextlib import closing
 
 import random
 import logging
 import sqlite3
+import aiosqlite
 import json
 import platform
 import os
@@ -45,6 +45,7 @@ else:
 async def on_ready() -> None:
     await bot.change_presence(status=disnake.Status.online)
     await status()
+    await create_db()
     # await setup()
     try:
         bot.load_extension(f"cogs.fun.counting")
@@ -62,15 +63,11 @@ async def on_ready() -> None:
     print("-----------------------------")
 
 
-def create_db():
-    with closing(connect_db()) as db:
+async def create_db():
+    async with aiosqlite.connect("database/database.db") as db:
         with open("database/setup.sql", "r") as f:
-            db.cursor().executescript(f.read())
-        db.commit()
-
-
-def connect_db():
-    return sqlite3.connect("database/database.db")
+            await db.executescript(f.read())
+        await db.commit()
 
 
 async def setup() -> None:
@@ -92,5 +89,4 @@ async def status() -> None:
     await bot.change_presence(activity=disnake.Game(random.choice(settings["status"])))
 
 
-create_db()
 bot.run(settings["token"])
