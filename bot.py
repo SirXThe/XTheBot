@@ -16,6 +16,7 @@
 
 import disnake
 from disnake.ext import commands, tasks
+from os.path import sep
 
 import random
 import logging
@@ -44,13 +45,7 @@ async def on_ready() -> None:
     await bot.change_presence(status=disnake.Status.online)
     await status()
     await create_db()
-    # await setup()
-    try:
-        bot.load_extension(f"cogs.counting.counting")
-        print(f"Loaded extension cogs.fun.counting")
-    except Exception as e:
-        exception = f"{type(e).__name__}: {e}"
-        print(f"Failed to load extension\n{exception}")
+    await setup()
     print("-----------------------------")
     print(f"Logged in as {bot.user.name}")
     print(f"Bot version: {settings['version']}")
@@ -71,7 +66,7 @@ async def create_db():
 async def setup() -> None:
     for path, subdirs, files in os.walk('cogs'):
         for name in files:
-            file_name: str = (os.path.join(path, name)).replace("\\", ".")
+            file_name: str = (os.path.join(path, name)).replace(sep, ".")
             if file_name.endswith(".py"):
                 extension = file_name[:-3]
                 try:

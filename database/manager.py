@@ -26,9 +26,9 @@ async def counting_check_entry(guild_id: int):
             return result
 
 
-async def counting_update_entry(guild_id: int, channel_id: int, mode: str, count: int,
-                                last_user: int, last_counted: datetime, resets: int,
-                                record: int, record_user: int, record_time: datetime):
+async def counting_update_entry(guild_id: int, channel_id: int, mode: str = "Normal", count: int = 0,
+                                last_user: int = 0, last_counted: datetime = 0, resets: int = 0,
+                                record: int = 0, record_user: int = 0, record_time: datetime = 0):
     async with aiosqlite.connect("database/database.db") as db:
         async with db.execute(f"SELECT * FROM stats WHERE guild_id='{guild_id}'") as cursor:
             result = await cursor.fetchone()

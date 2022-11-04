@@ -38,6 +38,7 @@ class Counting(commands.Cog):
     async def counting(self, interaction: ApplicationCommandInteraction):
         pass
 
+    @commands.has_permissions(administrator=True)
     @counting.sub_command(
         name="setup",
         description="[Admin] Setup the counting function.",
@@ -60,17 +61,22 @@ class Counting(commands.Cog):
             await interaction.send(embed=embed, ephemeral=True)
             return
         i = await db.counting_check_entry(interaction.guild.id)
-        await db.counting_update_entry(interaction.guild.id, channel.id, i[2], i[3], i[4], i[5], i[6], i[7], i[8], i[9])
+        if i is None:
+            await db.counting_update_entry(interaction.guild.id, channel.id)
+        else:
+            await db.counting_update_entry(interaction.guild.id, channel.id, "Normal", i[3], i[4], i[5], i[6], i[7],
+                                           i[8], i[9])
         embed = disnake.Embed(
             color=0x8b2d27,
             title="Updated Channel!",
             description=f"Updated channel to {channel.mention}!\n"
-                        f"The counting mode is now set to **{i[2]}**."
+                        f"The counting mode is now set to **Normal**."
         )
         await interaction.send(embed=embed)
         if not interaction.channel.id == channel.id:
             await channel.send(embed=embed)
 
+    @commands.has_permissions(administrator=True)
     @counting.sub_command(
         name="mode",
         description="[Admin] Change the current counting mode and reset the current count to 0.",
