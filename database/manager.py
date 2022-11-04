@@ -30,13 +30,14 @@ async def counting_update_entry(guild_id: int, channel_id: int, mode: str = "Nor
                                 last_user: int = 0, last_counted: datetime = 0, resets: int = 0,
                                 record: int = 0, record_user: int = 0, record_time: datetime = 0):
     async with aiosqlite.connect("database/database.db") as db:
-        async with db.execute(f"SELECT * FROM stats WHERE guild_id='{guild_id}'") as cursor:
+        async with db.execute(f"SELECT * FROM counting WHERE guild_id='{guild_id}'") as cursor:
             result = await cursor.fetchone()
             if result is None:
                 await db.execute("INSERT INTO counting(guild_id, channel_id, mode, count, last_user, "
                                  "last_counted, resets, record, record_user, record_time "
-                                 ") VALUES (?, ?, 0, 0, 0, 0, 0, 0, 0, 0)",
-                                 (guild_id, channel_id))
+                                 ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                 (guild_id, channel_id, mode, count, last_user, last_counted, resets, record,
+                                  record_user, record_time))
                 logging.info(f"[Counting] Created guild entry for {guild_id}, set it to {channel_id}")
                 await db.commit()
                 return

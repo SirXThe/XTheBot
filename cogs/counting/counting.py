@@ -105,7 +105,7 @@ class Counting(commands.Cog):
             await db.counting_update_entry(i[0], i[1], mode, 0, 0, datetime.utcnow(), i[6], i[7], i[8], i[9])
             embed = disnake.Embed(
                 color=0x8b2d27,
-                title="Updated mode!",
+                title="Updated Mode!",
                 description=f"Set the mode to **{mode}** and reset the current count to 0."
             )
             await interaction.send(embed=embed)
@@ -122,8 +122,7 @@ class Counting(commands.Cog):
     )
     async def server(self, interaction: ApplicationCommandInteraction):
         i = await db.counting_check_entry(interaction.guild.id)
-
-        if i is None or i[6] == 0:
+        if i is None or i[7] == 0:
             embed = disnake.Embed(
                 color=0x8b2d27,
                 title="Error!",
@@ -135,7 +134,7 @@ class Counting(commands.Cog):
             last_user = "n/a"
         else:
             last_user = f"<@{i[4]}>"
-        date = (datetime.strptime(i[5], '%Y-%m-%d %H:%M:%S.%f'))
+        date = (datetime.strptime(str(i[5]), '%Y-%m-%d %H:%M:%S.%f'))
         embed = disnake.Embed(
             color=0x8b2d27,
             title=f"Stats for {interaction.guild}",
@@ -173,7 +172,7 @@ class Counting(commands.Cog):
             await interaction.send(embed=embed, ephemeral=True)
             return
         else:
-            date = (datetime.strptime(i[5], '%Y-%m-%d %H:%M:%S.%f'))
+            date = (datetime.strptime(str(i[5]), '%Y-%m-%d %H:%M:%S.%f'))
             embed = disnake.Embed(
                 color=0x8b2d27,
                 title=f"Stats for {user}",
@@ -206,7 +205,7 @@ class Counting(commands.Cog):
                 title="Success!",
                 description=f"Deleted your data from **{interaction.guild}**."
             )
-            await interaction.send(embed=embed, ephemeral=True)
+            await interaction.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_message(self, message):
