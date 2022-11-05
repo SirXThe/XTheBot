@@ -14,19 +14,19 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import disnake
-from disnake.ext import commands, tasks
+import json
+import logging
+import os
+import platform
+import random
+import sqlite3
+import sys
 from os.path import sep
 
-import random
-import logging
-import sqlite3
+import aiohttp
 import aiosqlite
-import json
-import platform
-import os
-import sys
-
+import disnake
+from disnake.ext import commands, tasks
 
 logging.basicConfig(filename='bot.log', format='%(asctime)s %(levelname)s: %(message)s', datefmt='%m-%d-%Y %H:%M:%S',
                     encoding='utf-8', filemode='w', level=logging.INFO)
@@ -34,18 +34,24 @@ intents = disnake.Intents.all()
 bot = commands.InteractionBot(intents=intents)
 
 if not os.path.isfile("settings.json"):
+    logging.critical("Could not find the settings.json file!")
     sys.exit("An error occurred initializing the settings.json file!")
 else:
-    with open("settings.json") as file:
+    with open("settings.json", "r") as file:
         settings = json.load(file)
+        logging.info("Loaded the settings.json file")
+        bot.settings = settings
 
 
 @bot.event
 async def on_ready() -> None:
     await bot.change_presence(status=disnake.Status.online)
+    await get_api()
     await status()
     await create_db()
-    await setup()
+    # await setup()
+    bot.load_extension("cogs.counting.counting")
+    bot.load_extension("cogs.info.botinfo")
     print("-----------------------------")
     print(f"Logged in as {bot.user.name}")
     print(f"Bot version: {settings['version']}")
@@ -56,7 +62,21 @@ async def on_ready() -> None:
     print("-----------------------------")
 
 
-async def create_db():
+async def get_api() -> None:
+    async with aiohttp.ClientSession() as session:
+        async with session.get("https://xthe.me/XTheBotAPI/index.json") as request:
+            if request.status == 200:
+                data = await request.json()
+                bot.data = data
+                with open('data.json', 'w') as f:
+                    f.write(json.dumps(data))
+                    logging.info(f"Loaded the bot API from {request}")
+            else:
+                logging.critical(f"Could not access the API! Tried {request}")
+                sys.exit("Error: Could not access the API. Try again later!")
+
+
+async def create_db() -> None:
     async with aiosqlite.connect("database/database.db") as db:
         with open("database/setup.sql", "r") as f:
             await db.executescript(f.read())

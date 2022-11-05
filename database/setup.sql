@@ -34,5 +34,5 @@ CREATE TABLE IF NOT EXISTS `stats` (
 `correct`  int NOT NULL,
 `wrong`    int NOT NULL,
 `highest`  int NOT NULL,
-`last_counted`  int NOT NULL
+`last_counted`  text NOT NULL
 );

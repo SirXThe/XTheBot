@@ -30,6 +30,7 @@ from helpers import counting_helpers as helpers
 class Counting(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.lang = bot.data['counting']
 
     @commands.slash_command(
         dm_permission=False,
@@ -61,16 +62,18 @@ class Counting(commands.Cog):
             await interaction.send(embed=embed, ephemeral=True)
             return
         i = await db.counting_check_entry(interaction.guild.id)
+        mode = "Normal"
         if i is None:
-            await db.counting_update_entry(interaction.guild.id, channel.id)
+            await db.counting_new_entry(interaction.guild.id, channel.id)
         else:
-            await db.counting_update_entry(interaction.guild.id, channel.id, "Normal", i[3], i[4], i[5], i[6], i[7],
+            await db.counting_update_entry(interaction.guild.id, channel.id, mode, i[3], i[4], i[5], i[6], i[7],
                                            i[8], i[9])
         embed = disnake.Embed(
             color=0x8b2d27,
             title="Updated Channel!",
             description=f"Updated channel to {channel.mention}!\n"
-                        f"The counting mode is now set to **Normal**."
+                        f"The counting mode is now set to **{mode}**.\n"
+                        f"{self.lang[mode]}"
         )
         await interaction.send(embed=embed)
         if not interaction.channel.id == channel.id:
@@ -106,7 +109,8 @@ class Counting(commands.Cog):
             embed = disnake.Embed(
                 color=0x8b2d27,
                 title="Updated Mode!",
-                description=f"Set the mode to **{mode}** and reset the current count to 0."
+                description=f"Set the mode to **{mode}** and reset the current count to 0.\n"
+                            f"{self.lang[mode]}"
             )
             await interaction.send(embed=embed)
             if interaction.channel.id == i[1]:
@@ -163,7 +167,7 @@ class Counting(commands.Cog):
     )
     async def user(self, interaction: ApplicationCommandInteraction, user: disnake.User):
         i = await db.stats_check_entry(interaction.guild.id, user.id)
-        if i is None:
+        if i is None or i[4] == 0:
             embed = disnake.Embed(
                 color=0x8b2d27,
                 title="Error!",
@@ -225,42 +229,43 @@ class Counting(commands.Cog):
                 last_count = i[3]
                 current_count = last_count + 1
                 if i[2] == "Normal":
-                    answer = helpers.check_letters(content)
+                    answer = helpers.containsLetter(content)
                     if answer is None:
                         return
                     needed = i[3] + 1
                 elif i[2] == "Fibonacci":
-                    answer = helpers.check_letters(content)
+                    answer = helpers.containsLetter(content)
                     if answer is None:
                         return
-                    needed = helpers.fibonacci(last_count + 1)
+                    needed = helpers.Fibonacci(last_count + 1)
                 elif i[2] == "Binary":
-                    answer = helpers.check_letters(content)
+                    answer = helpers.containsLetter(content)
                     if answer is None:
                         return
                     needed = int(format(last_count + 1, "b"))
                 elif i[2] == "Roman":
-                    answer = helpers.check_roman(content)
+                    answer = helpers.isRoman(content)
                     if answer is None:
                         return
-                    needed = helpers.roman(last_count + 1)
+                    needed = helpers.Roman(last_count + 1)
                 elif i[2] == "Alphabet":
-                    answer = helpers.check_numbers(content)
+                    answer = helpers.containsNumber(content)
                     if answer is None:
                         return
-                    needed = helpers.letters(last_count + 1)
+                    needed = helpers.Letter(last_count + 1)
                 else:
                     embed = disnake.Embed(
                         color=0x8b2d27,
                         title="Error!",
-                        description="An error occurred!\nReset the current count to 0."
+                        description="An error occurred!\n"
+                                    "Reset the current count to 0."
                     )
                     await message.channel.send(embed=embed)
                     await db.counting_update_entry(i[0], i[1], "Normal", 0, 0, (datetime.utcnow()),
                                                    i[6], i[7], i[8], i[9])
                     logging.error(f"[Counting] Exception at on_message: Could not find {i[2]}")
                     return
-                if author == i[4]:
+                if author == i[4] and last_count != 0:
                     mode = random.choice(["Normal", "Binary", "Fibonacci", "Roman", "Alphabet"])
                     await db.counting_update_entry(i[0], i[1], mode, 0, 0, (datetime.utcnow()),
                                                    i[6] + 1, i[7], i[8], i[9])
@@ -269,24 +274,35 @@ class Counting(commands.Cog):
                         color=0x8b2d27,
                         title="Fail!",
                         description=f"{message.author.mention} was too **greedy** at {needed}!\n"
-                                    f"The mode is now set to **{mode}**."
+                                    f"The mode is now set to **{mode}**.\n"
+                                    f"{self.lang[mode]}"
                     )
                     await message.channel.send(embed=embed)
                     await message.add_reaction("❌")
                     return
-                if answer != needed:
+                if answer != needed and last_count != 0:
                     mode = random.choice(["Normal", "Binary", "Fibonacci", "Roman", "Alphabet"])
                     await db.counting_update_entry(i[0], i[1], mode, 0, 0, (datetime.utcnow()),
                                                    i[6] + 1, i[7], i[8], i[9])
-                    await db.stats_update_entry(guild, author, False, current_count, datetime.utcnow())
+                    await db.stats_update_entry(guild, author, False, current_count, (datetime.utcnow()))
                     embed = disnake.Embed(
                         color=0x8b2d27,
                         title="Fail!",
                         description=f"{message.author.mention} has **failed** at {needed}!\n "
-                                    f"The mode is now set to **{mode}**."
+                                    f"The mode is now set to **{mode}**.\n"
+                                    f"{self.lang[mode]}"
                     )
                     await message.channel.send(embed=embed)
                     await message.add_reaction("❌")
+                    return
+                if answer != needed and last_count == 0:
+                    embed = disnake.Embed(
+                        color=0x8b2d27,
+                        title="Warning!",
+                        description=f"The next count is **{needed}**!",
+                    )
+                    await message.channel.send(embed=embed)
+                    await message.add_reaction("⚠")
                     return
                 if answer == needed:
                     if i[7] < current_count:

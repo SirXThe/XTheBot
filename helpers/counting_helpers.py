@@ -18,25 +18,25 @@ from sympy import sympify
 import logging
 
 
-def check_numbers(n):
-    if any(a.isnumeric() for a in n):
+def containsNumber(n):
+    if any(c.isnumeric() for c in n):
         return
     else:
         return n.upper()
 
 
-def check_letters(n):
+def containsLetter(n):
     try:
-        if any(a.isalpha() for a in n):
+        if any(c.isalpha() for c in n):
             return
         else:
             return int(sympify(n))
     except Exception:
-        logging.warning(f"[Counting] Exception at check_letters: {Exception}")
+        logging.warning(f"[Counting] Exception at containsLetter: {Exception}")
         return
 
 
-def check_roman(n):
+def isRoman(n):
     number = {c for c in n.upper()}
     valid = {c for c in "MDCLXVI()"}
     if not number - valid:
@@ -45,7 +45,7 @@ def check_roman(n):
         return
 
 
-def fibonacci(n: int):
+def Fibonacci(n: int):
     if n < 0:
         return
     elif n == 0:
@@ -53,10 +53,10 @@ def fibonacci(n: int):
     elif n == 1 or n == 2:
         return 1
     else:
-        return fibonacci(n - 1) + fibonacci(n - 2)
+        return Fibonacci(n - 1) + Fibonacci(n - 2)
 
 
-def roman(n: int):
+def Roman(n: int):
     if n <= 0:
         return
     res = ""
@@ -82,7 +82,7 @@ def roman(n: int):
     return res
 
 
-def letters(n: int):
+def Letter(n: int):
     if n <= 0:
         return
     string = ''
