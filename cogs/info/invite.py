@@ -30,8 +30,9 @@ class InviteCommand(commands.Cog):
     async def invite(self, interaction: ApplicationCommandInteraction) -> None:
         embed = disnake.Embed(
             color=0x8b2d27,
-            title="Error!",
-            description="The bot hasn't been released to the public (yet)."
+            title="The invitation link:",
+            description="https://discord.com/oauth2/authorize?client_id=992092826366128230&permissions=8&scope=bot"
+                        "%20applications.commands "
         )
         embed.set_footer(
             text="Made by XThe"

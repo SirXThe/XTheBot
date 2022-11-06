@@ -42,7 +42,7 @@ class Counting(commands.Cog):
     @commands.has_permissions(administrator=True)
     @counting.sub_command(
         name="setup",
-        description="[Admin] Setup the counting function.",
+        description="[Admin] Set up the counting function.",
         options=[
             Option(
                 name="channel",
@@ -59,6 +59,9 @@ class Counting(commands.Cog):
                 title="Error!",
                 description=f"Please select a text channel!"
             )
+            embed.set_footer(
+                text="Made by XThe"
+            )
             await interaction.send(embed=embed, ephemeral=True)
             return
         i = await db.counting_check_entry(interaction.guild.id)
@@ -74,6 +77,9 @@ class Counting(commands.Cog):
             description=f"Updated channel to {channel.mention}!\n"
                         f"The counting mode is now set to **{mode}**.\n"
                         f"{self.lang[mode]}"
+        )
+        embed.set_footer(
+            text="Made by XThe"
         )
         await interaction.send(embed=embed)
         if not interaction.channel.id == channel.id:
@@ -102,6 +108,9 @@ class Counting(commands.Cog):
                 description="This server has no counting entry!\n"
                             "If you want to setup the counting function, run **/counting setup** first!"
             )
+            embed.set_footer(
+                text="Made by XThe"
+            )
             await interaction.send(embed=embed, ephemeral=True)
             return
         else:
@@ -111,6 +120,9 @@ class Counting(commands.Cog):
                 title="Updated Mode!",
                 description=f"Set the mode to **{mode}** and reset the current count to 0.\n"
                             f"{self.lang[mode]}"
+            )
+            embed.set_footer(
+                text="Made by XThe"
             )
             await interaction.send(embed=embed)
             if interaction.channel.id == i[1]:
@@ -132,6 +144,9 @@ class Counting(commands.Cog):
                 title="Error!",
                 description="This server has no counting stats!"
             )
+            embed.set_footer(
+                text="Made by XThe"
+            )
             await interaction.send(embed=embed, ephemeral=True)
             return
         if i[4] == 0:
@@ -150,12 +165,15 @@ class Counting(commands.Cog):
                         f"High Score: **{i[7]}**\n"
                         f"Scored by **<@{i[8]}>**"
         )
+        embed.set_footer(
+            text="Made by XThe"
+        )
         await interaction.send(embed=embed)
         return
 
     @counting.sub_command(
         name="user",
-        description="Show the statistics for an user.",
+        description="Show the statistics for a user.",
         options=[
             Option(
                 name="user",
@@ -173,6 +191,9 @@ class Counting(commands.Cog):
                 title="Error!",
                 description="This user has no counting stats!"
             )
+            embed.set_footer(
+                text="Made by XThe"
+            )
             await interaction.send(embed=embed, ephemeral=True)
             return
         else:
@@ -185,6 +206,9 @@ class Counting(commands.Cog):
                             f"Percentual Correct: **{round(int(i[2]) / (int(i[2]) + int(i[3])) * 100, 2)}**\n"
                             f"Highest Count: **{i[4]}**\n"
                             f"Time Since Last Count: **<t:{calendar.timegm(date.utctimetuple())}:R>**"
+            )
+            embed.set_footer(
+                text="Made by XThe"
             )
             await interaction.send(embed=embed)
             return
@@ -201,6 +225,9 @@ class Counting(commands.Cog):
                 title="Error!",
                 description="You need to count first!"
             )
+            embed.set_footer(
+                text="Made by XThe"
+            )
             await interaction.send(embed=embed, ephemeral=True)
         else:
             await db.stats_delete_entry(interaction.guild.id, interaction.user.id)
@@ -208,6 +235,9 @@ class Counting(commands.Cog):
                 color=0x8b2d27,
                 title="Success!",
                 description=f"Deleted your data from **{interaction.guild}**."
+            )
+            embed.set_footer(
+                text="Made by XThe"
             )
             await interaction.send(embed=embed)
 
@@ -260,6 +290,9 @@ class Counting(commands.Cog):
                         description="An error occurred!\n"
                                     "Reset the current count to 0."
                     )
+                    embed.set_footer(
+                        text="Made by XThe"
+                    )
                     await message.channel.send(embed=embed)
                     await db.counting_update_entry(i[0], i[1], "Normal", 0, 0, (datetime.utcnow()),
                                                    i[6], i[7], i[8], i[9])
@@ -277,6 +310,9 @@ class Counting(commands.Cog):
                                     f"The mode is now set to **{mode}**.\n"
                                     f"{self.lang[mode]}"
                     )
+                    embed.set_footer(
+                        text="Made by XThe"
+                    )
                     await message.channel.send(embed=embed)
                     await message.add_reaction("❌")
                     return
@@ -292,6 +328,9 @@ class Counting(commands.Cog):
                                     f"The mode is now set to **{mode}**.\n"
                                     f"{self.lang[mode]}"
                     )
+                    embed.set_footer(
+                        text="Made by XThe"
+                    )
                     await message.channel.send(embed=embed)
                     await message.add_reaction("❌")
                     return
@@ -300,6 +339,9 @@ class Counting(commands.Cog):
                         color=0x8b2d27,
                         title="Warning!",
                         description=f"The next count is **{needed}**!",
+                    )
+                    embed.set_footer(
+                        text="Made by XThe"
                     )
                     await message.channel.send(embed=embed)
                     await message.add_reaction("⚠")

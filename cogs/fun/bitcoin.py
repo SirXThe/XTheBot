@@ -26,7 +26,7 @@ class BitcoinCommand(commands.Cog):
 
     @commands.slash_command(
         name="bitcoin",
-        description="Show the current price of bitcoin.",
+        description="Show the current bitcoin value.",
     )
     async def bitcoin(self, interaction: ApplicationCommandInteraction) -> None:
         async with aiohttp.ClientSession() as session:
@@ -35,7 +35,7 @@ class BitcoinCommand(commands.Cog):
                     json = await request.json()
                     price = json[0]["price_usd"]
                     embed = disnake.Embed(
-                        title="The current bitcoin price:",
+                        title="The current bitcoin value:",
                         description=f"{price} US-Dollar",
                         color=0x8b2d27
                     )
