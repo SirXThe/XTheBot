@@ -25,18 +25,49 @@ class AvatarCommand(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(
-        name="avatar",
-        description="Get the avatar from a user.",
+        name="avatar"
+    )
+    async def avatar(self, interaction: ApplicationCommandInteraction) -> None:
+        pass
+
+    @avatar.sub_command(
+        name="main_user",
+        description="Get the main avatar from an user.",
         options=[
             Option(
                 name="user",
-                description="The user you want to get the avatar from.",
+                description="Select the user you want the avatar from.",
                 type=OptionType.user,
                 required=True
-            )
-        ]
+            ),
+        ],
     )
-    async def avatar(self, interaction: ApplicationCommandInteraction, user) -> None:
+    async def main_user(self, interaction: ApplicationCommandInteraction, user) -> None:
+        embed = disnake.Embed(
+            title=f"User Avatar from {user}:",
+            color=0x8b2d27
+        )
+        if user.default_avatar is not None:
+            embed.set_image(
+                url=user.default_avatar
+            )
+        else:
+            embed.description = "User does not have an avatar."
+        await interaction.send(embed=embed)
+
+    @avatar.sub_command(
+        name="user",
+        description="Get the server specific avatar from an user.",
+        options=[
+            Option(
+                name="user",
+                description="Select the user you want the avatar from.",
+                type=OptionType.user,
+                required=True
+            ),
+        ],
+    )
+    async def guild_user(self, interaction: ApplicationCommandInteraction, user) -> None:
         embed = disnake.Embed(
             title=f"User Avatar from {user}:",
             color=0x8b2d27
@@ -47,6 +78,23 @@ class AvatarCommand(commands.Cog):
             )
         else:
             embed.description = "User does not have an avatar."
+        await interaction.send(embed=embed)
+
+    @avatar.sub_command(
+        name="guild",
+        description="Get the avatar from the current server."
+    )
+    async def server(self, interaction: ApplicationCommandInteraction) -> None:
+        embed = disnake.Embed(
+            title=f"User Avatar from {interaction.guild}:",
+            color=0x8b2d27
+        )
+        if interaction.guild.icon is not None:
+            embed.set_image(
+                url=interaction.guild.icon
+            )
+        else:
+            embed.description = "Guild does not have an avatar."
         await interaction.send(embed=embed)
 
 

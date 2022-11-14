@@ -15,6 +15,8 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import disnake
+import calendar
+from datetime import datetime
 from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 
@@ -29,6 +31,7 @@ class ServerInfoCommand(commands.Cog):
         description="Show some information about the current server."
     )
     async def serverinfo(self, interaction: ApplicationCommandInteraction) -> None:
+        date = datetime.strptime(str(interaction.guild.created_at), '%Y-%m-%d %H:%M:%S.%f')
         embed = disnake.Embed(
             color=0x8b2d27,
             title=f"Information about {interaction.guild}",
@@ -38,7 +41,7 @@ class ServerInfoCommand(commands.Cog):
                         "**Owner**:\n"
                         f"{interaction.guild.owner}\n"
                         "**Created:**\n"
-                        f"{interaction.guild.created_at.replace(microsecond=0, tzinfo=None)}\n"
+                        f"<t:{calendar.timegm(date.utctimetuple())}:R>\n"
                         "**Members**:\n"
                         f"{interaction.guild.member_count}\n"
                         "**Boosts**:\n"
