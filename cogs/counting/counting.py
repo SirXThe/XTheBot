@@ -132,6 +132,92 @@ class Counting(commands.Cog):
                 await channel.send(embed=embed)
                 return
 
+    @commands.has_permissions(administrator=True)
+    @counting.sub_command(
+        name="unblock",
+        description="[Admin] Unblock a user from counting in this guild.",
+        options=[
+            Option(
+                name="user",
+                description="Select the user you want to unlock.",
+                type=OptionType.user,
+                required=True
+            )
+        ]
+    )
+    async def block(self, interaction: ApplicationCommandInteraction, user: disnake.User):
+        i = await db.blocked_users_check_entry(interaction.guild.id, user.id)
+        if i is None:
+            embed = disnake.Embed(
+                color=0x8b2d27,
+                title="Error!",
+                description=f"This user is not blocked."
+            )
+            embed.set_footer(
+                text="Made by XThe"
+            )
+            await interaction.send(embed=embed, ephemeral=True)
+        else:
+            await db.blocked_users_delete_entry(interaction.guild.id, user.id)
+            embed = disnake.Embed(
+                color=0x8b2d27,
+                title="User unblocked!",
+                description=f"User {user.mention} was successfully unblocked.\n"
+                            f"Moderator: **{interaction.author}**\n"
+            )
+            embed.set_footer(
+                text="Made by XThe"
+            )
+            await interaction.send(embed=embed)
+
+    @commands.has_permissions(administrator=True)
+    @counting.sub_command(
+        name="block",
+        description="[Admin] Block a user from counting in this guild.",
+        options=[
+            Option(
+                name="user",
+                description="Select the user you want to block.",
+                type=OptionType.user,
+                required=True
+            ),
+            Option(
+                name="reason",
+                description="(Optional) The reason why you want to block the user.",
+                type=OptionType.string,
+                required=False
+            ),
+        ],
+    )
+    async def block(self, interaction: ApplicationCommandInteraction, user: disnake.User, reason: str = "No reason "
+                                                                                                        "specified."):
+        i = await db.blocked_users_check_entry(interaction.guild.id, user.id)
+        if i is not None:
+            embed = disnake.Embed(
+                color=0x8b2d27,
+                title="Error!",
+                description=f"This user is already blocked.\n"
+                            f"Moderator: **<@{i[2]}>**\n"
+                            f"Reason: **{i[3]}**"
+            )
+            embed.set_footer(
+                text="Made by XThe"
+            )
+            await interaction.send(embed=embed, ephemeral=True)
+        else:
+            await db.blocked_users_new_entry(interaction.guild.id, user.id, interaction.author.id, reason)
+            embed = disnake.Embed(
+                color=0x8b2d27,
+                title="User blocked!",
+                description=f"User {user.mention} was successfully blocked.\n"
+                            f"Moderator: **{interaction.author}**\n"
+                            f"Reason: {reason}"
+            )
+            embed.set_footer(
+                text="Made by XThe"
+            )
+            await interaction.send(embed=embed)
+
     @counting.sub_command(
         name="server",
         description="Show the statistics for the current server."
@@ -297,6 +383,20 @@ class Counting(commands.Cog):
                     await db.counting_update_entry(i[0], i[1], "Normal", 0, 0, (datetime.utcnow()),
                                                    i[6], i[7], i[8], i[9])
                     logging.error(f"[Counting] Exception at on_message: Could not find {i[2]}")
+                    return
+                blocked = await db.blocked_users_check_entry(guild, author)
+                if blocked is not None:
+                    embed = disnake.Embed(
+                        color=0x8b2d27,
+                        title="Error!",
+                        description=f"You are currently blocked.\n"
+                                    f"Moderator: **<@{blocked[2]}>**\n"
+                                    f"Reason: **{blocked[3]}**"
+                    )
+                    embed.set_footer(
+                        text="Made by XThe"
+                    )
+                    await message.channel.send(embed=embed)
                     return
                 if author == i[4] and last_count != 0:
                     mode = random.choice(["Normal", "Binary", "Fibonacci", "Roman", "Alphabet"])

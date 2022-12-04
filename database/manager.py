@@ -116,12 +116,12 @@ async def stats_check_entry(guild_id: int, user_id: int):
             return result
 
 
-async def blocked_users_new_entry(guild_id: int, user_id: int, moderator_id: int, reason: str = "No reason provided."):
+async def blocked_users_new_entry(guild_id: int, user_id: int, moderator_id: int, reason: str):
     async with aiosqlite.connect("database/database.db") as db:
         async with db.execute(f"SELECT * FROM counting_blocked_users WHERE guild_id='{guild_id}' "
                               f"AND user_id='{user_id}'") as cursor:
             result = await cursor.fetchone()
-            if result is None:
+            if result is not None:
                 return
             else:
                 await db.execute("INSERT INTO counting_blocked_users(guild_id, user_id, moderator_id, reason)"
