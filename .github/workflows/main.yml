@@ -17,4 +17,4 @@ jobs:
       - run: mypy --install-types --non-interactive . || true
       - run: pytest . || true
       - run: shopt -s globstar && pyupgrade --py36-plus **/*.py || true
-      - run: safety check
+      # - run: safety check
