@@ -26,10 +26,11 @@ from os.path import sep
 import aiohttp
 import aiosqlite
 import disnake
+from disnake import ApplicationCommandInteraction
 from disnake.ext import commands, tasks
 
-logging.basicConfig(filename='bot.log', format='%(asctime)s %(levelname)s: %(message)s', datefmt='%m-%d-%Y %H:%M:%S',
-                    encoding='utf-8', filemode='w', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', datefmt='%m-%d-%Y %H:%M:%S',
+                    encoding='utf-8', level=logging.INFO)
 intents = disnake.Intents.all()
 bot = commands.InteractionBot(intents=intents)
 
@@ -51,6 +52,7 @@ async def on_ready() -> None:
     await create_db()
     # await setup()
     bot.load_extension("cogs.counting.counting")
+    bot.load_extension("cogs.fun.parsers")
     print("-----------------------------")
     print(f"Logged in as {bot.user.name}")
     print(f"Bot version: {settings['version']}")

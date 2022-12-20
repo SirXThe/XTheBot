@@ -85,12 +85,12 @@ def Roman(n: int):
 def Letter(n: int):
     if n <= 0:
         return
-    string = ''
+    res = ''
     while n:
         temp = n % 26
         if temp == 0:
             temp = 26
         letter = chr(ord('A') + temp - 1)
-        string = letter + string
+        res += letter
         n = int((n - 1) / 26)
-    return string
+    return res
