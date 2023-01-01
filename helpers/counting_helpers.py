@@ -1,5 +1,5 @@
-#  XTheBot
-#  Copyright (C) 2022  XThe
+#  XTheBot - A multifunctional bot for Discord.
+#  Copyright (C) 2022 - 2023 XThe
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Affero General Public License as published by

@@ -1,5 +1,5 @@
-#  XTheBot
-#  Copyright (C) 2022  XThe
+#  XTheBot - A multifunctional bot for Discord.
+#  Copyright (C) 2022 - 2023  XThe
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Affero General Public License as published by
@@ -455,7 +455,7 @@ class Counting(commands.Cog):
                                                        i[7], i[8], i[9])
                     await db.stats_update_entry(guild, author, True, current_count, (datetime.utcnow()))
                     if i[7] < current_count:
-                        reaction = "☑"
+                        reaction = "✅"
                     else:
                         reaction = "✅"
                     if current_count == 42:

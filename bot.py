@@ -1,5 +1,5 @@
-#  XTheBot
-#  Copyright (C) 2022  XThe
+#  XTheBot - A multifunctional bot for Discord.
+#  Copyright (C) 2022 - 2023 XThe
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Affero General Public License as published by
@@ -26,7 +26,6 @@ from os.path import sep
 import aiohttp
 import aiosqlite
 import disnake
-from disnake import ApplicationCommandInteraction
 from disnake.ext import commands, tasks
 
 logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', datefmt='%m-%d-%Y %H:%M:%S',
@@ -50,9 +49,7 @@ async def on_ready() -> None:
     await get_api()
     await status()
     await create_db()
-    # await setup()
-    bot.load_extension("cogs.counting.counting")
-    bot.load_extension("cogs.fun.parsers")
+    await setup()
     print("-----------------------------")
     print(f"Logged in as {bot.user.name}")
     print(f"Bot version: {settings['version']}")
@@ -65,7 +62,7 @@ async def on_ready() -> None:
 
 async def get_api() -> None:
     async with aiohttp.ClientSession() as session:
-        async with session.get("https://xthe.me/XTheBotAPI/index.json") as request:
+        async with session.get("api.xthe.me") as request:
             if request.status == 200:
                 data = await request.json()
                 bot.data = data

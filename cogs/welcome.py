@@ -1,5 +1,5 @@
-#  XTheBot
-#  Copyright (C) 2022  XThe
+#  XTheBot - A multifunctional bot for Discord.
+#  Copyright (C) 2022 - 2023 XThe
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Affero General Public License as published by
@@ -39,8 +39,7 @@ class Welcome(commands.Cog):
                     title=f"Thanks for joining {channel.guild}!"
                 )
                 await member.send(embed=embed)
-                await member.edit(nick=f"+ {member}")
-            except:
+            except Exception:
                 pass
 
     @commands.Cog.listener()
